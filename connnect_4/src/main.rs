@@ -42,12 +42,12 @@ fn print_game(board: [[Spot; 7]; 6], current_turn: Spot) {
     println!("Current turn: {}", current_turn.to_string());
 }
 
-fn invalid_move() -> usize {
+fn invalid_move(board: [[Spot; 7]; 6]) -> usize {
     println!("Invalid move!");
-    get_col()
+    get_col(board)
 }
 
-fn get_col() -> usize {
+fn get_col(board: [[Spot; 7]; 6]) -> usize {
     print!("Choose column to place piece: ");
     std::io::stdout().flush().unwrap();
     let mut input = String::new();
@@ -60,16 +60,16 @@ fn get_col() -> usize {
             let num = c.to_digit(10);
             match num {
                 Some(n) => {
-                    if n > 0 && n < 8 {
+                    if n > 0 && n < 8 && board[0][(n - 1) as usize] == Spot::Empty {
                         n as usize - 1
                     } else {
-                        invalid_move()
+                        invalid_move(board)
                     }
                 },
-                None => invalid_move()
+                None => invalid_move(board)
             }
         },
-        None => invalid_move()
+        None => invalid_move(board)
     }
 }
 
@@ -89,7 +89,7 @@ fn main() {
 
     loop {
         print_game(board, current_turn);
-        let move_col = get_col();
+        let move_col = get_col(board);
         drop_spot(&mut board, move_col, current_turn);
         current_turn.next_turn();
 
