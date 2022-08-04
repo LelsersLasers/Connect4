@@ -1,6 +1,5 @@
 use std::io::prelude::*;
 
-
 #[derive(Copy, Clone, PartialEq)]
 enum Spot {
     X,
@@ -28,6 +27,12 @@ fn clear_screen() {
     print!("\x1B[2J\x1B[1;1H");
 }
 
+fn win(board: [[Spot; 7]; 6], winner: Spot) {
+    print_game(board, Spot::Empty);
+    println!("\n\n{} wins!\n", winner.to_string());
+    std::process::exit(0);
+}
+
 fn print_game(board: [[Spot; 7]; 6], current_turn: Spot) {
     clear_screen();
     for row in board.iter() {
@@ -39,7 +44,11 @@ fn print_game(board: [[Spot; 7]; 6], current_turn: Spot) {
     }
     println!("+++++++++");
     println!("+1234567+");
-    println!("Current turn: {}", current_turn.to_string());
+    if current_turn != Spot::Empty {
+        println!("Current turn: {}", current_turn.to_string());
+    } else {
+        println!("Game over!");
+    }
 }
 
 fn invalid_move(board: [[Spot; 7]; 6]) -> usize {
@@ -65,11 +74,54 @@ fn get_col(board: [[Spot; 7]; 6]) -> usize {
                     } else {
                         invalid_move(board)
                     }
-                },
-                None => invalid_move(board)
+                }
+                None => invalid_move(board),
             }
-        },
-        None => invalid_move(board)
+        }
+        None => invalid_move(board),
+    }
+}
+
+fn four_connected(board: [[Spot; 7]; 6], player: Spot) {
+    for row in board.iter() {
+        for spot in row.windows(4) {
+            if spot == [player, player, player, player] {
+                win(board, player);
+            }
+        }
+    }
+    for col in 0..7 {
+        for row in board.windows(4) {
+            if row[0][col] == player
+                && row[1][col] == player
+                && row[2][col] == player
+                && row[3][col] == player
+            {
+                win(board, player);
+            }
+        }
+    }
+    for row in board.windows(4) {
+        for col in 0..4 {
+            if row[0][col] == player
+                && row[1][col + 1] == player
+                && row[2][col + 2] == player
+                && row[3][col + 3] == player
+            {
+                win(board, player);
+            }
+        }
+    }
+    for row in board.windows(4) {
+        for col in 3..7 {
+            if row[0][col] == player
+                && row[1][col - 1] == player
+                && row[2][col - 2] == player
+                && row[3][col - 3] == player
+            {
+                win(board, player);
+            }
+        }
     }
 }
 
@@ -82,7 +134,6 @@ fn drop_spot(board: &mut [[Spot; 7]; 6], col: usize, current_turn: Spot) {
     }
 }
 
-
 fn main() {
     let mut board: [[Spot; 7]; 6] = [[Spot::Empty; 7]; 6];
     let mut current_turn = Spot::X;
@@ -91,8 +142,7 @@ fn main() {
         print_game(board, current_turn);
         let move_col = get_col(board);
         drop_spot(&mut board, move_col, current_turn);
+        four_connected(board, current_turn);
         current_turn.next_turn();
-
-
     }
 }
