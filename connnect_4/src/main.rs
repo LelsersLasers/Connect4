@@ -1,14 +1,14 @@
 use std::io::prelude::*;
 
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 enum Spot {
     X,
     O,
     Empty,
 }
 impl Spot {
-    fn to_string(&self) -> &'static str {
+    fn to_string(self) -> &'static str {
         match self {
             Spot::X => "X",
             Spot::O => "O",
@@ -44,7 +44,7 @@ fn print_game(board: [[Spot; 7]; 6], current_turn: Spot) {
 
 fn invalid_move() -> usize {
     println!("Invalid move!");
-    return get_col();
+    get_col()
 }
 
 fn get_col() -> usize {
@@ -61,15 +61,24 @@ fn get_col() -> usize {
             match num {
                 Some(n) => {
                     if n > 0 && n < 8 {
-                        return n as usize - 1;
+                        n as usize - 1
                     } else {
-                        return invalid_move();
+                        invalid_move()
                     }
                 },
                 None => invalid_move()
             }
         },
         None => invalid_move()
+    }
+}
+
+fn drop_spot(board: &mut [[Spot; 7]; 6], col: usize, current_turn: Spot) {
+    for row in (0..6).rev() {
+        if board[row][col] == Spot::Empty {
+            board[row][col] = current_turn;
+            break;
+        }
     }
 }
 
@@ -81,7 +90,7 @@ fn main() {
     loop {
         print_game(board, current_turn);
         let move_col = get_col();
-        board[0][move_col] = current_turn;
+        drop_spot(&mut board, move_col, current_turn);
         current_turn.next_turn();
 
 
