@@ -35,15 +35,16 @@ fn win(board: [[Spot; 7]; 6], winner: Spot) {
 
 fn print_game(board: [[Spot; 7]; 6], current_turn: Spot) {
     clear_screen();
+    println!("");
     for row in board.iter() {
-        print!("|");
+        print!(" | ");
         for spot in row.iter() {
-            print!("{}", spot.to_string());
+            print!("{} ", spot.to_string());
         }
         println!("|");
     }
-    println!("+++++++++");
-    println!("+1234567+");
+    println!(" +---------------+");
+    println!(" | 1 2 3 4 5 6 7 |");
     if current_turn != Spot::Empty {
         println!("Current turn: {}", current_turn.to_string());
     } else {
